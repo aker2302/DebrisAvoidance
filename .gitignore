@@ -5,6 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
+*.czml
 
 # Distribution / packaging
 .Python
@@ -35,6 +36,7 @@ MANIFEST
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
+debris.txt
 
 # Unit test / coverage reports
 htmlcov/
