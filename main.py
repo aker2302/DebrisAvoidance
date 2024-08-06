@@ -23,7 +23,7 @@ tle_entries = [(lines[i], lines[i+1], lines[i+2]) for i in range(0, len(lines), 
 
 # Define start and end dates for propagation
 start_date = datetime(2024, 7, 21)
-end_date = datetime(2024, 8, 21)
+end_date = datetime(2024, 7, 23)
 step_minutes = 10
 
 # Function to propagate TLE entries
@@ -84,11 +84,16 @@ for debris in list(trajectory_pos.keys()) :
     for i in range(len(data)-1):
         interval = (data[i][0]).strftime("%Y-%m-%dT%H:%M:%SZ")+"/"+(data[i+1][0]).strftime("%Y-%m-%dT%H:%M:%SZ")
         epoch = (data[i][0].strftime("%Y-%m-%dT%H:%M:%SZ"))
-        numberlead = [0,step_minutes*60,step_minutes*60,0]
-        numbertrail = [0,0,step_minutes*60,step_minutes*60]
+        # numberlead = [0,step_minutes*600,step_minutes*600,0]
+        # numbertrail = [0,0,step_minutes*600,step_minutes*600]
+        numberlead = [0,5905,5905,0]
+        numbertrail = [0,0,5905,5905]
         leadTime.append({"interval":interval,"epoch":epoch,"number":numberlead})
         trailTime.append({"interval":interval,"epoch":epoch,"number":numbertrail})
-        czml_positions.append([timesec,data[i][1][0],data[i][1][1],data[i][1][2]])
+        czml_positions.append(timesec)
+        czml_positions.append(data[i][1][0]*1000)
+        czml_positions.append(data[i][1][1]*1000)
+        czml_positions.append(data[i][1][2]*1000)
         timesec += 600
 
 
@@ -100,6 +105,7 @@ for debris in list(trajectory_pos.keys()) :
     # Create the satellite packet
     debris_packet = Packet(
         id=debris,
+        availability = (start_date).strftime("%Y-%m-%dT%H:%M:%SZ")+"/"+(end_date).strftime("%Y-%m-%dT%H:%M:%SZ"),
         position=Position(
             interpolationAlgorithm="LAGRANGE",
             interpolationDegree=5,
@@ -108,16 +114,28 @@ for debris in list(trajectory_pos.keys()) :
             cartesian=czml_positions
         ),
         path=Path(
-            show={"interval":(start_date).strftime("%Y-%m-%dT%H:%M:%SZ")+"/"+(end_date).strftime("%Y-%m-%dT%H:%M:%SZ"),"boolean":True},
+            show=[{"interval":(start_date).strftime("%Y-%m-%dT%H:%M:%SZ")+"/"+(end_date).strftime("%Y-%m-%dT%H:%M:%SZ"),"boolean":True}],
             width=1,
             material={"solidColor": {"color": {"rgba": [255, 0, 0, 255]}}},
             leadTime=leadTime,
             trailTime=trailTime,
             resolution=120
+        ),
+        label = Label(
+            fillColor = {"rgba":[0,255,0,255]},
+            font = "11pt Lucida Console",
+            horizontalOrigin = "LEFT",
+            outlineColor = {"rgba":[0,0,0,255]},
+            outlineWidth = 2,
+            pixelOffset = {"cartesian2":[12,0]},
+            show = True,
+            style = "FILL_AND_OUTLINE",
+            text = f"{debris}",
+            verticalOrigin = "CENTER"
         )
     )
 
-    if iter < 1 :
+    if iter < 4:
         # Add packet to document
         czml_doc.append(debris_packet)
     iter += 1
